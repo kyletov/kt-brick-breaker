@@ -15,13 +15,13 @@
 		constructor(props) {
 			super(props);
 			this.state = {
-				"currentState": true,
+				"currentState": 0,
 			}
 			this.clickHandler = this.clickHandler.bind(this);
 		}
 
 		clickHandler(e) {
-			// Do something
+			
 		}
 
 		render() {
@@ -33,6 +33,6 @@
 	}
 
 	ReactDOM.render( <ViewComponent />,
-    document.getElementById('root')
-  );
+	document.getElementById('root')
+    );
 </script>
