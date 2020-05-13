@@ -5,7 +5,8 @@
 		}
 		render(props){
 			return (
-				<canvas id="stage" width="800" height="800" style={{border:"1px solid black"}} />
+				<canvas id="stage" width="800" height="800" style={{border:"1px solid black"}} >
+				</canvas>
 			);
 		}
 	}
