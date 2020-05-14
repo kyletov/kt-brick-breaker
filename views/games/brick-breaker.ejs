@@ -1,4 +1,21 @@
+<script language="javascript" >
+	<% include ../games/model.js %>
+	<% include ../games/controller.js %>
+</script>
 <script type="text/babel">
+	class Button extends React.Component {
+		constructor(props) {
+			super(props);
+		}
+
+		render() {
+			return (
+				<button onClick={this.props.clickHandler} > {this.props.value}
+				</button>
+			);
+		}
+	}
+
 	class GameCanvas extends React.Component {
 		constructor(props) {
 			super(props);
@@ -14,13 +31,38 @@
 	class ViewComponent extends React.Component {
 		constructor(props) {
 			super(props);
+			this.state = {
+				"currentView": "HomePage"
+			}
+			this.playButtonClickHandler = this.playButtonClickHandler.bind(this);
+		}
+
+		playButtonClickHandler(e) {
+			this.setState( (prevState, props) => {
+				return { "currentView": "PlayView" };
+			});
+
+			setupGame();
+
+			startGame();
 		}
 
 		render() {
 			return (
 				<center>
 					<h1>Welcome to KT Brick Breaker!</h1>
-					<GameCanvas />
+					<table>
+						<tbody>
+							<tr>
+								<td>
+									<GameCanvas />
+								</td>
+								<td>
+									<Button clickHandler={this.playButtonClickHandler} value="Play" />
+								</td>
+							</tr>
+						</tbody>
+					</table>
 				</center>
 			);
 		}
