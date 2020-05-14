@@ -35,6 +35,7 @@
 				"currentView": "HomePage"
 			}
 			this.playButtonClickHandler = this.playButtonClickHandler.bind(this);
+			this.pauseButtonClickHandler = this.pauseButtonClickHandler.bind(this);
 		}
 
 		playButtonClickHandler(e) {
@@ -42,10 +43,20 @@
 				return { "currentView": "PlayView" };
 			});
 
-			setupGame();
-
-			startGame();
+			let promise = new Promise(resolve => setTimeout(resolve, 10));
+			promise.then(() => {
+				console.log("is game active? "+isGameActive());
+				if (!isGameActive()){
+					setupGame();
+				}
+				startGame();
+			});
 		}
+
+		pauseButtonClickHandler(e) {
+			pauseGame();
+		}
+
 
 		render() {
 			return (

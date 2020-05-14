@@ -6,12 +6,15 @@ gameStatus = false;
 function setupGame() {
 	stage = new Stage(document.getElementById('stage'));
 	gameStatus = true;
+
+	// https://javascript.info/keyboard-events
+	document.addEventListener('keydown', moveByKey);
+	document.addEventListener('keyup', stopByKey);
 }
 
 function startGame() {
 	stage.canvas = document.getElementById('stage');
-	stage.draw();
-	// interval = setInterval(function(){ stage.update(); stage.draw(); }, 20);
+	interval = setInterval( () => { stage.update(); stage.draw(); }, 20);
 }
 
 function pauseGame() {
@@ -24,16 +27,40 @@ function endGame() {
 	gameStatus = false;
 }
 
-function gameRunning() {
+function isGameActive() {
 	return gameStatus;
 }
 
-function moveByKey(event){
+function moveByKey(event) {
 	var key = event.key;
 	var moveMap = {
-		'a': { "move": "left"},
-		's': { "move": "down"},
-		'd': { "move": "right"},
-		'w': { "move": "up"}
+		'a': { "move": "left" },
+		'd': { "move": "right" },
+		'ArrowLeft': { "move": "left" },
+		'ArrowRight': { "move": "right" },
+		' ': { "move": "spacebar" }
 	};
+
+	if (key in moveMap) {
+		stage.player.hasBall ?
+		stage.player.move(moveMap[key].move, stage.ball) : 
+		stage.player.move(moveMap[key].move);
+	}
+}
+
+function stopByKey(event) {
+	var key = event.key;
+	var moveMap = {
+		'a': { "move": "left" },
+		'd': { "move": "right" },
+		'ArrowLeft': { "move": "left" },
+		'ArrowRight': { "move": "right" },
+		' ': { "move": "spacebar" }
+	};
+
+	if (key in moveMap) {
+		stage.player.hasBall ?
+		stage.player.stop(moveMap[key].move, stage.ball) : 
+		stage.player.stop(moveMap[key].move);
+	}
 }
