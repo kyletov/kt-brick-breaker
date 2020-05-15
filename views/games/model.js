@@ -29,31 +29,40 @@ class Stage {
 	}
 
 	update() {
-		// Check ball collisions with players/walls/bricks
-		if (this.ball.ypos + this.ball.radius == this.player.ypos - this.player.height/2
-			&& this.ball.xpos >= this.player.xpos - (this.player.length/2)
-			&& this.ball.xpos <= this.player.xpos + (this.player.length/2)) {
-			this.ball.bounce("player");
-		} else if (this.ball.ypos - this.ball.radius <= 1) {
-			this.ball.bounce("top wall");
-		} else if (this.ball.xpos - this.ball.radius <= 1) {
-			this.ball.bounce("left wall");
-		} else if (this.ball.xpos + this.ball.radius >= 799) {
-			this.ball.bounce("right wall");
+		if (!this.ball.onPlayer) {
+			// Check ball collisions with players/walls/bricks
+			if (this.ball.ypos + this.ball.radius == this.player.ypos - this.player.height/2
+				&& this.ball.xpos >= this.player.xpos - (this.player.length/2)
+				&& this.ball.xpos <= this.player.xpos + (this.player.length/2)) {
+				this.ball.bounce("player");
+			} else if (this.ball.ypos - this.ball.radius <= 1) {
+				this.ball.bounce("top wall");
+			} else if (this.ball.xpos - this.ball.radius <= 1) {
+				this.ball.bounce("left wall");
+			} else if (this.ball.xpos + this.ball.radius >= 799) {
+				this.ball.bounce("right wall");
+			}
+
+			// else if () {
+			// 	this.ball.bounce("bottom brick");
+			// } else if () {
+			// 	this.ball.bounce("top brick");
+			// } else if () {
+			// 	this.ball.bounce("left brick");
+			// } else if () {
+			// 	this.ball.bounce("right brick");
+			// }
 		}
 
-		// else if () {
-		// 	this.ball.bounce("bottom brick");
-		// } else if () {
-		// 	this.ball.bounce("top brick");
-		// } else if () {
-		// 	this.ball.bounce("left brick");
-		// } else if () {
-		// 	this.ball.bounce("right brick");
-		// } 
+		// Check Player can't move off the board
+		if (this.player.xpos + (this.player.speed * this.player.xDirection) < this.ball.radius ||
+			this.player.xpos + (this.player.speed * this.player.xDirection) > this.canvas.width-this.ball.radius) {
+			this.player.stop("left", this.ball);
+		} else {
+			this.player.update();
+		}
 
 		// Update new locations of moving stage elements
-		this.player.update();
 		this.ball.update();
 	}
 
@@ -81,8 +90,8 @@ class Ball {
 	}
 
 	bounce(item=null) {
-		// Deals with ball collisions
-		console.log("collide");
+		console.log("bounce");
+		// Deals with ball bounces
 		if (this.onPlayer) {
 			this.onPlayer = 0;
 			this.yvelocity *= -1;
@@ -97,8 +106,6 @@ class Ball {
 				this.xvelocity *= -1;
 			}
 		}
-
-		console.log("in bounce");
 
 		if (++this.numOfBounces % 10 == 0) {
 			// Setting cap ball speed
@@ -191,7 +198,7 @@ class Player {
 	}
 
 	update() {
-		this.xpos += this.speed*this.xDirection;
+		this.xpos += this.speed * this.xDirection;
 	}
 
 	draw(context) {
