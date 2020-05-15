@@ -21,24 +21,49 @@ class Stage {
 		context.beginPath();
 		context.lineWidth = 2;
 		context.strokeStyle = colour;
-		context.strokeRect(0, 0, 800, 800);
+		context.moveTo(0, 800);
+		context.lineTo(0, 0);
+		context.lineTo(800, 0);
+		context.lineTo(800, 800);
+		context.stroke();
 	}
 
 	update() {
+		// Check ball collisions with players/walls/bricks
+		if (this.ball.ypos + this.ball.radius == this.player.ypos - this.player.height/2
+			&& this.ball.xpos >= this.player.xpos - (this.player.length/2)
+			&& this.ball.xpos <= this.player.xpos + (this.player.length/2)) {
+			this.ball.bounce("player");
+		} else if (this.ball.ypos - this.ball.radius <= 1) {
+			this.ball.bounce("top wall");
+		} else if (this.ball.xpos - this.ball.radius <= 1) {
+			this.ball.bounce("left wall");
+		} else if (this.ball.xpos + this.ball.radius >= 799) {
+			this.ball.bounce("right wall");
+		}
+
+		// else if () {
+		// 	this.ball.bounce("bottom brick");
+		// } else if () {
+		// 	this.ball.bounce("top brick");
+		// } else if () {
+		// 	this.ball.bounce("left brick");
+		// } else if () {
+		// 	this.ball.bounce("right brick");
+		// } 
+
 		// Update new locations of moving stage elements
 		this.player.update();
 		this.ball.update();
-
-		// Checks for ball collisions
 	}
 
 	draw() {
 		var context = this.canvas.getContext('2d');
 		this.drawBackground(context, "black");
 		this.drawBorder(context, "red");
-		this.brick.draw(context);
-		this.ball.draw(context);
 		this.player.draw(context);
+		this.ball.draw(context);
+		this.brick.draw(context);
 	}
 }
 
@@ -46,24 +71,47 @@ class Ball {
 	constructor(xpos, ypos, playerSpeed) {
 		this.xpos = xpos;
 		this.ypos = ypos;
-		this.radius = 5;
+		this.radius = 4;
 		this.xvelocity = 0;
 		this.yvelocity = 0;
 		this.onPlayer = playerSpeed;
 		this.xDirection = 0;
+		this.numOfBounces = 0;
+		this.speedCap = 8;
 	}
 
-	collide() {
+	bounce(item=null) {
 		// Deals with ball collisions
 		console.log("collide");
-		this.yvelocity = -this.yvelocity;
-		this.xvelocity *= 1.01;
-		this.yvelocity *= 1.01;
+		if (this.onPlayer) {
+			this.onPlayer = 0;
+			this.yvelocity *= -1;
+		} else {
+			// Bounce off Player or Top Wall
+			if (item == "player" || item == "top wall") {
+				this.yvelocity *= -1;
+			}
+
+			// Bounce off Left Wall or Right Wall
+			if (item == "left wall" || item == "right wall") {
+				this.xvelocity *= -1;
+			}
+		}
+
+		console.log("in bounce");
+
+		if (++this.numOfBounces % 10 == 0) {
+			// Setting cap ball speed
+			var xvel = this.xvelocity * 1.10;
+			var yvel = this.yvelocity * 1.10;
+			this.xvelocity = (xvel > this.speedCap || xvel < -1*this.speedCap) ? (xvel > 0 ? this.speedCap : -1*this.speedCap) : xvel;
+			this.yvelocity = (yvel > this.speedCap || yvel < -1*this.speedCap) ? (yvel > 0 ? this.speedCap : -1*this.speedCap) : yvel;
+		}
 	}
 
 	update() {
 		if (this.onPlayer) {
-			this.xpos += this.onPlayer*this.xDirection;
+			this.xpos += this.onPlayer * this.xDirection;
 		} else {
 			this.xpos += this.xvelocity;
 			this.ypos += this.yvelocity;
@@ -82,6 +130,7 @@ class Player {
 	constructor() {
 		this.xpos = 400;
 		this.ypos = 780;
+		this.height = 6;
 		this.length = 60;
 		this.speed = 10;
 		this.xDirection = 0;
@@ -89,11 +138,10 @@ class Player {
 	}
 
 	releaseBall(ball) {
-		ball.xvelocity = 0;
+		ball.xvelocity = 1;
 		ball.yvelocity = 1;
-		ball.collide();
+		ball.bounce();
 		this.hasBall = false;
-		ball.onPlayer = 0;
 	}
 
 	fireBullets() {
@@ -150,7 +198,7 @@ class Player {
 		context.beginPath();
 		context.moveTo(this.xpos-(this.length/2), this.ypos);
 		context.lineTo(this.xpos+(this.length/2), this.ypos);
-		context.lineWidth = 5;
+		context.lineWidth = this.height;
 		context.strokeStyle = "white";
 		context.stroke();
 	}

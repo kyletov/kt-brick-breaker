@@ -45,7 +45,6 @@
 
 			let promise = new Promise(resolve => setTimeout(resolve, 10));
 			promise.then(() => {
-				console.log("is game active? "+isGameActive());
 				if (!isGameActive()){
 					setupGame();
 				}
