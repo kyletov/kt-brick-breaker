@@ -30,28 +30,33 @@ class Stage {
 
 	update() {
 		if (!this.ball.onPlayer) {
-			// Check ball collisions with players/walls/bricks
-			if (this.ball.ypos + this.ball.radius == this.player.ypos - this.player.height/2
-				&& this.ball.xpos >= this.player.xpos - (this.player.length/2)
-				&& this.ball.xpos <= this.player.xpos + (this.player.length/2)) {
-				this.ball.bounce("player");
-			} else if (this.ball.ypos - this.ball.radius <= 1) {
-				this.ball.bounce("top wall");
-			} else if (this.ball.xpos - this.ball.radius <= 1) {
-				this.ball.bounce("left wall");
-			} else if (this.ball.xpos + this.ball.radius >= 799) {
-				this.ball.bounce("right wall");
-			}
+			var ball_floored_xpos = Math.floor(this.ball.xpos);
+			var ball_floored_ypos = Math.floor(this.ball.ypos);
 
-			// else if () {
-			// 	this.ball.bounce("bottom brick");
-			// } else if () {
-			// 	this.ball.bounce("top brick");
-			// } else if () {
-			// 	this.ball.bounce("left brick");
-			// } else if () {
-			// 	this.ball.bounce("right brick");
-			// }
+			// Check ball collisions with players/walls/bricks
+			if (ball_floored_ypos + this.ball.radius >= this.player.ypos - (this.player.height/2)
+				&& this.player.xpos - (this.player.length/2) <= ball_floored_xpos
+				&& ball_floored_xpos <= this.player.xpos + (this.player.length/2)) {
+				this.ball.bounce("player");
+			} else if (ball_floored_ypos - this.ball.radius <= 1) {
+				this.ball.bounce("top wall");
+			} else if (ball_floored_xpos - this.ball.radius <= 1) {
+				this.ball.bounce("left wall");
+			} else if (ball_floored_xpos + this.ball.radius >= this.canvas.width-1) {
+				this.ball.bounce("right wall");
+			} else if (ball_floored_ypos - this.ball.radius == this.brick.ypos + this.brick.height
+				&& this.brick.xpos <= ball_floored_xpos && ball_floored_xpos <= this.brick.xpos + this.brick.width) {
+				this.ball.bounce("bottom of brick");
+			} else if (ball_floored_ypos + this.ball.radius == this.brick.ypos
+				&& this.brick.xpos <= ball_floored_xpos && ball_floored_xpos <= this.brick.xpos + this.brick.width) {
+				this.ball.bounce("top of brick");
+			} else if (ball_floored_xpos + this.ball.radius == this.brick.xpos
+				&& this.brick.ypos <= ball_floored_ypos && ball_floored_ypos <= this.brick.ypos + this.brick.height) {
+				this.ball.bounce("left of brick");
+			} else if (ball_floored_xpos - this.ball.radius == this.brick.xpos + this.brick.width
+				&& this.brick.ypos <= ball_floored_ypos && ball_floored_ypos <= this.brick.ypos + this.brick.height) {
+				this.ball.bounce("right of brick");
+			}
 		}
 
 		// Check Player can't move off the board
@@ -61,7 +66,7 @@ class Stage {
 		} else {
 			this.player.update();
 		}
-
+		
 		// Update new locations of moving stage elements
 		this.ball.update();
 	}
@@ -96,13 +101,14 @@ class Ball {
 			this.onPlayer = 0;
 			this.yvelocity *= -1;
 		} else {
-			// Bounce off Player or Top Wall
-			if (item == "player" || item == "top wall") {
+			console.log(item);
+			// Bounce off Player or Top Wall or top/bottom of brick
+			if (item == "player" || item == "top wall" || item == "top of brick" || item == "bottom of brick") {
 				this.yvelocity *= -1;
 			}
 
-			// Bounce off Left Wall or Right Wall
-			if (item == "left wall" || item == "right wall") {
+			// Bounce off Left Wall or Right Wall or left/right of brick
+			if (item == "left wall" || item == "right wall" || item == "left of brick" || item == "right of brick") {
 				this.xvelocity *= -1;
 			}
 		}
