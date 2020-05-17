@@ -148,7 +148,6 @@ class Player {
 		ball.xvelocity = 1;
 		ball.yvelocity = 1;
 		ball.bounce();
-		this.hasBall = false;
 	}
 
 	fireBullets() {
@@ -177,10 +176,11 @@ class Player {
 			if (this.hasBall) {
 				ball.xDirection = 1;
 			}
-		} else if (action == "spacebar"){
+		} else if (action == "spacebar") {
 			if (this.hasBall) {
 				console.log("released ball");
 				this.releaseBall(ball);
+				this.hasBall = false;
 			} else {
 				console.log("fired bullet");
 				this.fireBullets();
