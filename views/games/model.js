@@ -45,7 +45,7 @@ class Stage {
 			if (!ball.onPlayer) {
 
 				// Check ball collisions with players/walls
-				if (ball.ypos + ball.radius == this.player.ypos - (this.player.height/2)
+				if (ball.ypos + ball.radius >= this.player.ypos - (this.player.height/2)
 					&& this.player.xpos - (this.player.length/2) <= ball.xpos
 					&& ball.xpos <= this.player.xpos + (this.player.length/2)) {
 					ball.bounce("player");
@@ -94,7 +94,6 @@ class Stage {
 
 		if (this.balls.length == 0) {
 			this.resetInitialState();
-			this.balls[0].update();
 		}
 	}
 
