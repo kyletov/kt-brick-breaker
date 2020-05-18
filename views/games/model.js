@@ -91,7 +91,7 @@ class Ball {
 		this.onPlayer = playerSpeed;
 		this.xDirection = 0;
 		this.numOfBounces = 0;
-		this.speedCap = 8;
+		this.speedCap = 3;
 	}
 
 	bounce(item=null) {
@@ -113,13 +113,13 @@ class Ball {
 			}
 		}
 
-		if (++this.numOfBounces % 10 == 0) {
-			// Setting cap ball speed
-			var xvel = this.xvelocity * 1.10;
-			var yvel = this.yvelocity * 1.10;
-			this.xvelocity = (xvel > this.speedCap || xvel < -1*this.speedCap) ? (xvel > 0 ? this.speedCap : -1*this.speedCap) : xvel;
-			this.yvelocity = (yvel > this.speedCap || yvel < -1*this.speedCap) ? (yvel > 0 ? this.speedCap : -1*this.speedCap) : yvel;
-		}
+		// Increase ball speed
+		// if (++this.numOfBounces % 10 == 0) {
+		// 	var xvel = this.xvelocity * 1.10;
+		// 	var yvel = this.yvelocity * 1.10;
+		// 	this.xvelocity = (Math.abs(xvel) > this.speedCap) ? (xvel > 0 ? this.speedCap : -1*this.speedCap) : xvel;
+		// 	this.yvelocity = (Math.abs(yvel) > this.speedCap) ? (yvel > 0 ? this.speedCap : -1*this.speedCap) : yvel;
+		// }
 	}
 
 	update() {
@@ -151,8 +151,8 @@ class Player {
 	}
 
 	releaseBall(ball) {
-		ball.xvelocity = 1;
-		ball.yvelocity = 1;
+		ball.xvelocity = ball.speedCap;
+		ball.yvelocity = ball.speedCap;
 		ball.bounce();
 	}
 
