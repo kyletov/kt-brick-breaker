@@ -6,8 +6,20 @@ class Stage {
 		this.stage = stage;
 		this.canvas = null;
 		this.player = new Player();
-		this.ball = new Ball(this.player.xpos, this.player.ypos-8, this.player.speed);
-		this.brick = new Brick();
+		this.initialBall = new Ball(this.player.xpos, this.player.ypos-8, this.player.speed);
+		this.balls = [this.initialBall];
+		this.player.setHeldBall(this.balls[0]);
+		this.bricks = [];
+
+		// Initialize bricks of stage
+		for (let i = 0; i < 10; i++) {
+			this.bricks.push(new Brick(50*(i+1), 50*(i+1)));
+		}
+	}
+
+	resetInitialState() {
+		this.balls.push(new Ball(this.player.xpos, this.player.ypos-8, this.player.speed));
+		this.player.setHeldBall(this.balls[0]);
 	}
 
 	drawBackground(context, colour) {
@@ -29,46 +41,61 @@ class Stage {
 	}
 
 	update() {
-		if (!this.ball.onPlayer) {
-			var ball_floored_xpos = Math.floor(this.ball.xpos);
-			var ball_floored_ypos = Math.floor(this.ball.ypos);
+		for (let ball of this.balls) {
+			if (!ball.onPlayer) {
 
-			// Check ball collisions with players/walls/bricks
-			if (ball_floored_ypos + this.ball.radius >= this.player.ypos - (this.player.height/2)
-				&& this.player.xpos - (this.player.length/2) <= ball_floored_xpos
-				&& ball_floored_xpos <= this.player.xpos + (this.player.length/2)) {
-				this.ball.bounce("player");
-			} else if (ball_floored_ypos - this.ball.radius <= 1) {
-				this.ball.bounce("top wall");
-			} else if (ball_floored_xpos - this.ball.radius <= 1) {
-				this.ball.bounce("left wall");
-			} else if (ball_floored_xpos + this.ball.radius >= this.canvas.width-1) {
-				this.ball.bounce("right wall");
-			} else if (ball_floored_ypos - this.ball.radius == this.brick.ypos + this.brick.height
-				&& this.brick.xpos <= ball_floored_xpos && ball_floored_xpos <= this.brick.xpos + this.brick.width) {
-				this.ball.bounce("bottom of brick");
-			} else if (ball_floored_ypos + this.ball.radius == this.brick.ypos
-				&& this.brick.xpos <= ball_floored_xpos && ball_floored_xpos <= this.brick.xpos + this.brick.width) {
-				this.ball.bounce("top of brick");
-			} else if (ball_floored_xpos + this.ball.radius == this.brick.xpos
-				&& this.brick.ypos <= ball_floored_ypos && ball_floored_ypos <= this.brick.ypos + this.brick.height) {
-				this.ball.bounce("left of brick");
-			} else if (ball_floored_xpos - this.ball.radius == this.brick.xpos + this.brick.width
-				&& this.brick.ypos <= ball_floored_ypos && ball_floored_ypos <= this.brick.ypos + this.brick.height) {
-				this.ball.bounce("right of brick");
+				// Check ball collisions with players/walls
+				if (ball.ypos + ball.radius == this.player.ypos - (this.player.height/2)
+					&& this.player.xpos - (this.player.length/2) <= ball.xpos
+					&& ball.xpos <= this.player.xpos + (this.player.length/2)) {
+					ball.bounce("player");
+				} else if (ball.ypos - ball.radius <= 1) {
+					ball.bounce("top wall");
+				} else if (ball.xpos - ball.radius <= 1) {
+					ball.bounce("left wall");
+				} else if (ball.xpos + ball.radius >= this.canvas.width-1) {
+					ball.bounce("right wall");
+				}
+
+				// Check ball collisions with bricks
+				for (let brick of this.bricks) {
+					if (ball.ypos - ball.radius == brick.ypos + brick.height
+						&& brick.xpos <= ball.xpos && ball.xpos <= brick.xpos + brick.width) {
+						ball.bounce("bottom of brick");
+					} else if (ball.ypos + ball.radius == brick.ypos
+						&& brick.xpos <= ball.xpos && ball.xpos <= brick.xpos + brick.width) {
+						ball.bounce("top of brick");
+					} else if (ball.xpos + ball.radius == brick.xpos
+						&& brick.ypos <= ball.ypos && ball.ypos <= brick.ypos + brick.height) {
+						ball.bounce("left of brick");
+					} else if (ball.xpos - ball.radius == brick.xpos + brick.width
+						&& brick.ypos <= ball.ypos && ball.ypos <= brick.ypos + brick.height) {
+						ball.bounce("right of brick");
+					}
+				}
 			}
 		}
 
 		// Check Player can't move off the board
-		if (this.player.xpos + (this.player.speed * this.player.xDirection) < this.ball.radius ||
-			this.player.xpos + (this.player.speed * this.player.xDirection) > this.canvas.width-this.ball.radius) {
-			this.player.stop("left", this.ball);
+		if (this.player.xpos + (this.player.speed * this.player.xDirection) < this.initialBall.radius ||
+			this.player.xpos + (this.player.speed * this.player.xDirection) > this.canvas.width-this.initialBall.radius) {
+			this.player.stop("left", this.initialBall);
 		} else {
 			this.player.update();
 		}
 		
 		// Update new locations of moving stage elements
-		this.ball.update();
+		for (let ball of this.balls) {
+			ball.update();
+			if (ball.ypos >= 800) {
+				this.balls.splice(this.balls.indexOf(ball), 1);
+			}
+		}
+
+		if (this.balls.length == 0) {
+			this.resetInitialState();
+			this.balls[0].update();
+		}
 	}
 
 	draw() {
@@ -76,8 +103,14 @@ class Stage {
 		this.drawBackground(context, "black");
 		this.drawBorder(context, "red");
 		this.player.draw(context);
-		this.ball.draw(context);
-		this.brick.draw(context);
+
+		for (let ball of this.balls) {
+			ball.draw(context);
+		}
+
+		for (let brick of this.bricks) {
+			brick.draw(context);
+		}
 	}
 }
 
@@ -91,7 +124,11 @@ class Ball {
 		this.onPlayer = playerSpeed;
 		this.xDirection = 0;
 		this.numOfBounces = 0;
-		this.speedCap = 3;
+		this.speedCap = 2;
+	}
+
+	setXDirection(direction) {
+		this.xDirection = direction;
 	}
 
 	bounce(item=null) {
@@ -147,13 +184,17 @@ class Player {
 		this.length = 60;
 		this.speed = 10;
 		this.xDirection = 0;
-		this.hasBall = true;
+		this.hasBall = null;
 	}
 
-	releaseBall(ball) {
-		ball.xvelocity = ball.speedCap;
-		ball.yvelocity = ball.speedCap;
-		ball.bounce();
+	setHeldBall(ball) {
+		this.hasBall = ball;
+	}
+
+	releaseBall() {
+		this.hasBall.xvelocity = this.hasBall.speedCap;
+		this.hasBall.yvelocity = this.hasBall.speedCap;
+		this.hasBall.bounce();
 	}
 
 	fireBullets() {
@@ -170,23 +211,23 @@ class Player {
 		}
 	}
 
-	move(action, ball=false) {
+	move(action) {
 		console.log(action);
 		if (action == "left") {
 			this.xDirection = -1;
 			if (this.hasBall) {
-				ball.xDirection = -1;
+				this.hasBall.setXDirection(-1);
 			}
 		} else if (action == "right") {
 			this.xDirection = 1;
 			if (this.hasBall) {
-				ball.xDirection = 1;
+				this.hasBall.setXDirection(1)
 			}
 		} else if (action == "spacebar") {
 			if (this.hasBall) {
 				console.log("released ball");
-				this.releaseBall(ball);
-				this.hasBall = false;
+				this.releaseBall(this.hasBall);
+				this.hasBall = null;
 			} else {
 				console.log("fired bullet");
 				this.fireBullets();
@@ -194,11 +235,11 @@ class Player {
 		}
 	}
 
-	stop(action, ball=false) {
+	stop(action) {
 		if (action == "left" || action == "right") {
 			this.xDirection = 0;
 			if (this.hasBall) {
-				ball.xDirection = 0;
+				this.hasBall.setXDirection(0);
 			}
 		}
 	}
@@ -218,9 +259,9 @@ class Player {
 }
 
 class Brick {
-	constructor() {
-		this.xpos = 50;
-		this.ypos = 50;
+	constructor(xpos, ypos) {
+		this.xpos = xpos;
+		this.ypos = ypos;
 		this.width = 50;
 		this.height = 20;
 		this.colour = "green";

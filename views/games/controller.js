@@ -42,8 +42,6 @@ function moveByKey(event) {
 	};
 
 	if (key in moveMap) {
-		stage.player.hasBall ?
-		stage.player.move(moveMap[key].move, stage.ball) : 
 		stage.player.move(moveMap[key].move);
 	}
 }
@@ -59,8 +57,6 @@ function stopByKey(event) {
 	};
 
 	if (key in moveMap) {
-		stage.player.hasBall ?
-		stage.player.stop(moveMap[key].move, stage.ball) : 
 		stage.player.stop(moveMap[key].move);
 	}
 }
