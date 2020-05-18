@@ -10,10 +10,10 @@ const pool = new Pool({
 });
 
 express()
-  .use(express.static(path.join(__dirname, 'public')));
-  .set('views', path.join(__dirname, 'views'));
-  .set('view engine', 'ejs');
-  .get('/', (req, res) => res.render('pages/index'));
+  .use(express.static(path.join(__dirname, 'public')))
+  .set('views', path.join(__dirname, 'views'))
+  .set('view engine', 'ejs')
+  .get('/', (req, res) => res.render('pages/index'))
   .get('/db', async (req, res) => {
   	try {
   		const client = await pool.connect();
@@ -25,5 +25,5 @@ express()
   		console.error(err);
   		res.send("Error " + err);
   	}
-  });
-  .listen(PORT, () => console.log(`Listening on ${ PORT }`));
+  })
+  .listen(PORT, () => console.log(`Listening on ${ PORT }`))
