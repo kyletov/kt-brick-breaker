@@ -135,7 +135,7 @@ class Stage {
 			this.player.update();
 		}
 		
-		// Update new locations of moving stage elements
+		// Update new locations of stage elements
 		for (let ball of this.balls) {
 			ball.update();
 			if (ball.ypos >= 800) {
@@ -145,6 +145,18 @@ class Stage {
 
 		if (this.balls.length == 0) {
 			this.resetInitialState();
+		}
+
+		for (let brick of this.bricks) {
+			if (!brick.isAlive()) {
+				this.bricks.splice(this.bricks.indexOf(brick), 1);
+			}
+		}
+
+		if (this.bricks.length == 0) {
+			console.log("You win!");
+			window.alert("You win!");
+			endGame();
 		}
 	}
 
@@ -203,12 +215,12 @@ class Ball {
 				this.xvelocity = this.xvelocity < 0 ? this.xvelocity : -1*this.xvelocity;
 				this.yvelocity *= -1;
 			} else if (item == NEXTLEFTMOSTPLAYER) {
-				this.xvelocity = this.xvelocity < 0 ? this.xvelocity : -1*this.xvelocity;
+				this.xvelocity = this.xvelocity < 0 ? this.xvelocity-0.5 : (-1*this.xvelocity)+0.5;
 				this.yvelocity *= -1;
 			} else if (item == MIDDLEPLAYER) {
 				this.yvelocity *= -1;
 			} else if (item == NEXTRIGHTMOSTPLAYER) {
-				this.xvelocity = this.xvelocity < 0 ? -1*this.xvelocity : this.xvelocity;
+				this.xvelocity = this.xvelocity < 0 ? (-1*this.xvelocity)-0.5 : this.xvelocity+0.5;
 				this.yvelocity *= -1;
 			} else if (item == RIGHTMOSTPLAYER) {
 				this.xvelocity = this.xvelocity < 0 ? -1*this.xvelocity : this.xvelocity;
@@ -404,6 +416,11 @@ class Brick {
 		this.width = 50;
 		this.height = 20;
 		this.colour = "green";
+		this.active = true;
+	}
+
+	isAlive() {
+		return this.active;
 	}
 
 	whichCorner(ball) {
@@ -441,6 +458,7 @@ class Brick {
 		
 		// Check if in hitzone
 		if (inXRange && inYRange) {
+			this.active = false;
 			if (ball.xpos + ball.radius <= this.xpos && ball.ypos - ball.radius >= this.ypos && ball.ypos + ball.radius <= this.ypos + this.height) { // left side
 				return LEFTSIDE;
 			} else if (ball.ypos + ball.radius <= this.ypos && ball.xpos - ball.radius >= this.xpos && ball.xpos + ball.radius <= this.xpos + this.width) { // top side
