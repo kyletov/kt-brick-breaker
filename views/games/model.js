@@ -1,6 +1,12 @@
 function randint(n){ return Math.round(Math.random()*n); }
 function rand(n){ return Math.random()*n; }
 
+const LEFTMOSTPLAYER = "left most player";
+const NEXTLEFTMOSTPLAYER = "next left most player";
+const MIDDLEPLAYER = "middle player";
+const NEXTRIGHTMOSTPLAYER = "next right most player";
+const RIGHTMOSTPLAYER = "right most player";
+
 const TOPSIDE = "top side";
 const LEFTSIDE = "left side";
 const BOTTOMSIDE = "bottom side";
@@ -10,7 +16,6 @@ const TOPLEFTCORNER = "top left corner";
 const TOPRIGHTCORNER = "top right corner";
 const BOTTOMLEFTCORNER = "bottom left corner";
 const BOTTOMRIGHTCORNER = "botttom right corner";
-
 
 class Stage {
 	constructor(stage) {
@@ -34,17 +39,34 @@ class Stage {
 	}
 
 	checkCollision(ball) {
-		// Checks collisions
-		// Returns the player or the brick it collided with
-		if (ball.ypos + ball.radius >= this.player.ypos - (this.player.height/2)
-			&& this.player.xpos - (this.player.length/2) <= ball.xpos
-			&& ball.xpos <= this.player.xpos + (this.player.length/2)) {
-			ball.bounce("player");
-		} else if (ball.ypos - ball.radius <= 1) {
+		// Check ball collisions with player
+		switch(this.player.isHit(ball)) {
+			case LEFTMOSTPLAYER:
+				ball.bounce(LEFTMOSTPLAYER);
+				break;
+			case NEXTLEFTMOSTPLAYER:
+				ball.bounce(NEXTLEFTMOSTPLAYER);
+				break;
+			case MIDDLEPLAYER:
+				ball.bounce(MIDDLEPLAYER);
+				break;
+			case NEXTRIGHTMOSTPLAYER:
+				ball.bounce(NEXTRIGHTMOSTPLAYER);
+				break;
+			case RIGHTMOSTPLAYER:
+				ball.bounce(RIGHTMOSTPLAYER);
+				break;
+		} 
+
+		// Check ball collisions with walls 
+		if (ball.ypos - ball.radius <= 1) {
+			ball.lastHitObject = "top wall";
 			ball.bounce("top wall");
 		} else if (ball.xpos - ball.radius <= 1) {
+			ball.lastHitObject = "left wall";
 			ball.bounce("left wall");
 		} else if (ball.xpos + ball.radius >= this.canvas.width-1) {
+			ball.lastHitObject = "right wall";
 			ball.bounce("right wall");
 		}
 
@@ -52,47 +74,32 @@ class Stage {
 		for (let brick of this.bricks) {
 			switch(brick.isHit(ball)) {
 				case BOTTOMSIDE:
-					ball.lastHitObject = brick;
 					ball.bounce(BOTTOMSIDE);
 					break;
 				case TOPSIDE:
-					ball.lastHitObject = brick;
 					ball.bounce(TOPSIDE);
 					break;
 				case LEFTSIDE:
-					ball.lastHitObject = brick;
 					ball.bounce(LEFTSIDE);
 					break;
 				case RIGHTSIDE:
-					ball.lastHitObject = brick;
 					ball.bounce(RIGHTSIDE);
 					break;
 				case TOPLEFTCORNER:
-					ball.lastHitObject = brick;
 					ball.bounce(TOPLEFTCORNER);
 					break;
 				case TOPRIGHTCORNER:
-					ball.lastHitObject = brick;
 					ball.bounce(TOPRIGHTCORNER);
 					break;
 				case BOTTOMLEFTCORNER:
-					ball.lastHitObject = brick;
 					ball.bounce(BOTTOMLEFTCORNER);
 					break;
 				case BOTTOMRIGHTCORNER:
-					ball.lastHitObject = brick;
 					ball.bounce(BOTTOMRIGHTCORNER);
 					break;
 			}
 		}
 	}
-
-	calculateReboundAngle(ball) {
-		var player = stage.player;
-
-		// Checks where ball collided with the player
-	}
-
 
 	drawBackground(context, colour) {
 		context.beginPath();
@@ -115,14 +122,6 @@ class Stage {
 	update() {
 		for (let ball of this.balls) {
 			if (!ball.onPlayer) {
-
-				// TODO: Make checking collisions work with decimals/double/floating point numbers
-
-				// TODO: Ball bounce off angles from player
-				// 5 different sections on player determines angle adjustments
-
-				// TODO: Ball bounce off angles from wall corners
-
 				// TODO: Breaking bricks when ball hits it
 				this.checkCollision(ball);
 			}
@@ -189,16 +188,32 @@ class Ball {
 		// Deals with ball bounces
 		if (this.onPlayer) {
 			this.onPlayer = 0;
+			this.lastHitObject = "player";
 			this.yvelocity *= -1;
 		} else {
 			console.log(item);
 
-			// Bounce off Player
-
 			// Bounce off Top Wall or top/bottom of brick
-			if (item == "player" || item == "top wall" || item == TOPSIDE || item == BOTTOMSIDE) {
+			if (item == "top wall" || item == TOPSIDE || item == BOTTOMSIDE) {
 				this.yvelocity *= -1;
 			}
+
+			// Bounce off Player
+			if (item == LEFTMOSTPLAYER) {
+				this.xvelocity = this.xvelocity < 0 ? this.xvelocity : -1*this.xvelocity;
+				this.yvelocity *= -1;
+			} else if (item == NEXTLEFTMOSTPLAYER) {
+				this.xvelocity = this.xvelocity < 0 ? this.xvelocity : -1*this.xvelocity;
+				this.yvelocity *= -1;
+			} else if (item == MIDDLEPLAYER) {
+				this.yvelocity *= -1;
+			} else if (item == NEXTRIGHTMOSTPLAYER) {
+				this.xvelocity = this.xvelocity < 0 ? -1*this.xvelocity : this.xvelocity;
+				this.yvelocity *= -1;
+			} else if (item == RIGHTMOSTPLAYER) {
+				this.xvelocity = this.xvelocity < 0 ? -1*this.xvelocity : this.xvelocity;
+				this.yvelocity *= -1;
+			} 
 
 			// Bounce off Left Wall or Right Wall or left/right of brick
 			if (item == "left wall" || item == "right wall" || item == LEFTSIDE || item == RIGHTSIDE) {
@@ -274,6 +289,51 @@ class Player {
 		this.hasBall.xvelocity = this.hasBall.initialSpeed;
 		this.hasBall.yvelocity = this.hasBall.initialSpeed;
 		this.hasBall.bounce();
+	}
+
+	isHit(ball) {
+		if (ball.lastHitObject == this) {
+			return false;
+		}
+
+		if (ball.ypos + ball.radius >= this.ypos - (this.height/2) &&
+			this.xpos - (this.length/2) <= ball.xpos && ball.xpos <= this.xpos + (this.length/2)) {
+
+			ball.lastHitObject = "player";
+
+			// console.log("ball position: ");
+			// console.log(ball.xpos, ball.ypos);
+			// console.log("player position: ");
+			// console.log(this.xpos, this.ypos);
+
+			// Checks where the ball hit on player
+			let divider = this.length/5;
+
+			let leftMostPlayer = ball.xpos >= this.xpos - (this.length/2) && ball.xpos <= (this.xpos - (this.length/2) + divider);
+			let nextLeftMostPlayer = ball.xpos >= this.xpos - (this.length/2) + divider && ball.xpos <= this.xpos - (this.length/2) + (2 * divider);
+			let middlePlayer = ball.xpos >= this.xpos - (this.length/2) + (2 * divider) && ball.xpos <= this.xpos - (this.length/2) + ((3 * divider));
+			let nextRightMostPlayer = ball.xpos >= this.xpos - (this.length/2) + (3 * divider) && ball.xpos <= this.xpos - (this.length/2) + (4 * divider);
+			let RightMostPlayer = ball.xpos >= this.xpos - (this.length/2) + (4 * divider) && ball.xpos <= this.xpos - (this.length/2) + (5 * divider);
+
+			// console.log("leftMostPlayer: " + leftMostPlayer);
+			// console.log("nextLeftMostPlayer: " + nextLeftMostPlayer);
+			// console.log("middlePlayer: " + middlePlayer);
+			// console.log("nextRightMostPlayer: " + nextRightMostPlayer);
+			// console.log("RightMostPlayer: " + RightMostPlayer);
+			// window.alert("hit player");
+
+			if (leftMostPlayer) {
+				return LEFTMOSTPLAYER;
+			} else if (nextLeftMostPlayer) {
+				return NEXTLEFTMOSTPLAYER;
+			} else if (middlePlayer) {
+				return MIDDLEPLAYER;
+			} else if (nextRightMostPlayer) {
+				return NEXTRIGHTMOSTPLAYER;
+			} else if (RightMostPlayer) {
+				return RIGHTMOSTPLAYER;
+			}
+		}
 	}
 
 	fireBullets() {
@@ -391,6 +451,7 @@ class Brick {
 				return BOTTOMSIDE;
 			} else { // One of the corners
 				// Figure out which corner
+				ball.lastHitObject = this;
 				return this.whichCorner(ball);
 			}
 		}
