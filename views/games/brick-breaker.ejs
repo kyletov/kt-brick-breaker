@@ -8,7 +8,49 @@
 			super(props);
 		}
 
+		render(props) {
+			return (
+				<button onClick={this.props.clickHandler} > {this.props.value}
+				</button>
+			);
+		}
+	}
+
+	class Instructions extends React.Component {
+		constructor(props) {
+			super(props);
+		}
+
 		render() {
+			return (
+				<div>
+					<center>
+						<table>
+							<tbody>
+								<tr>
+									<td>
+										<h1>How to play: </h1>
+										Left Arrow Key: To move left
+										<br/>
+										Right Arrow Key: To move right
+										<br/>
+										Spacebar: To release ball
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</center>
+				</div>
+			);
+		}
+	}
+
+	class ActionButton extends React.Component {
+		constructor(props) {
+			super(props);
+		}
+
+		render(props) {
 			return (
 				<button onClick={this.props.clickHandler} > {this.props.value}
 				</button>
@@ -56,19 +98,25 @@
 			pauseGame();
 		}
 
-
 		render() {
 			return (
 				<center>
-					<h1>Welcome to KT Brick Breaker!</h1>
 					<table>
 						<tbody>
 							<tr>
 								<td>
+									<center>
+										<h1>Welcome to KT Brick Breaker!</h1>
+									</center>
 									<GameCanvas />
 								</td>
 								<td>
 									<Button clickHandler={this.playButtonClickHandler} value="Play" />
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<Instructions />
 								</td>
 							</tr>
 						</tbody>
