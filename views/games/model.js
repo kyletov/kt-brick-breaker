@@ -33,6 +33,10 @@ class Stage {
 		}
 	}
 
+	isWon() {
+		return this.bricks.length == 0;
+	}
+
 	resetInitialState() {
 		this.balls.push(new Ball(this.player.xpos, this.player.ypos-8, this.player.speed));
 		this.player.setHeldBall(this.balls[0]);
@@ -120,6 +124,11 @@ class Stage {
 	}
 
 	update() {
+		if (this.isWon()) {
+			console.log("You win!");
+			endGame();
+		}
+
 		for (let ball of this.balls) {
 			if (!ball.onPlayer) {
 				// TODO: Breaking bricks when ball hits it
@@ -151,12 +160,6 @@ class Stage {
 			if (!brick.isAlive()) {
 				this.bricks.splice(this.bricks.indexOf(brick), 1);
 			}
-		}
-
-		if (this.bricks.length == 0) {
-			console.log("You win!");
-			window.alert("You win!");
-			endGame();
 		}
 	}
 
@@ -212,18 +215,18 @@ class Ball {
 
 			// Bounce off Player
 			if (item == LEFTMOSTPLAYER) {
-				this.xvelocity = this.xvelocity < 0 ? this.xvelocity : -1*this.xvelocity;
+				this.xvelocity = this.xvelocity < 0 ? this.xvelocity-1 : (-1*this.xvelocity)+0.5;
 				this.yvelocity *= -1;
 			} else if (item == NEXTLEFTMOSTPLAYER) {
-				this.xvelocity = this.xvelocity < 0 ? this.xvelocity-0.5 : (-1*this.xvelocity)+0.5;
+				this.xvelocity = this.xvelocity < 0 ? this.xvelocity-1 : (-1*this.xvelocity)+0.5;
 				this.yvelocity *= -1;
 			} else if (item == MIDDLEPLAYER) {
 				this.yvelocity *= -1;
 			} else if (item == NEXTRIGHTMOSTPLAYER) {
-				this.xvelocity = this.xvelocity < 0 ? (-1*this.xvelocity)-0.5 : this.xvelocity+0.5;
+				this.xvelocity = this.xvelocity < 0 ? (-1*this.xvelocity)-0.5 : this.xvelocity+1;
 				this.yvelocity *= -1;
 			} else if (item == RIGHTMOSTPLAYER) {
-				this.xvelocity = this.xvelocity < 0 ? -1*this.xvelocity : this.xvelocity;
+				this.xvelocity = this.xvelocity < 0 ? (-1*this.xvelocity)-0.5 : this.xvelocity+1;
 				this.yvelocity *= -1;
 			} 
 
@@ -458,14 +461,15 @@ class Brick {
 		
 		// Check if in hitzone
 		if (inXRange && inYRange) {
+			let buffer = ball.radius/2;
 			this.active = false;
-			if (ball.xpos + ball.radius <= this.xpos && ball.ypos - ball.radius >= this.ypos && ball.ypos + ball.radius <= this.ypos + this.height) { // left side
+			if (ball.xpos + ball.radius == this.xpos && ball.ypos - buffer >= this.ypos && ball.ypos + buffer <= this.ypos + this.height) { // left side
 				return LEFTSIDE;
-			} else if (ball.ypos + ball.radius <= this.ypos && ball.xpos - ball.radius >= this.xpos && ball.xpos + ball.radius <= this.xpos + this.width) { // top side
+			} else if (ball.ypos + ball.radius == this.ypos && ball.xpos - buffer >= this.xpos && ball.xpos + buffer <= this.xpos + this.width) { // top side
 				return TOPSIDE;
-			} else if (ball.xpos - ball.radius >= this.xpos + this.width && ball.ypos - ball.radius >= this.ypos && ball.ypos + ball.radius <= this.ypos + this.height) { // right side
+			} else if (ball.xpos - ball.radius == this.xpos + this.width && ball.ypos - buffer >= this.ypos && ball.ypos + buffer <= this.ypos + this.height) { // right side
 				return RIGHTSIDE;
-			} else if (ball.ypos - ball.radius >= this.ypos + this.height && ball.xpos - ball.radius >= this.xpos && ball.xpos + ball.radius <= this.xpos + this.width) { // bottom side
+			} else if (ball.ypos - ball.radius == this.ypos + this.height && ball.xpos - buffer >= this.xpos && ball.xpos + buffer <= this.xpos + this.width) { // bottom side
 				return BOTTOMSIDE;
 			} else { // One of the corners
 				// Figure out which corner
