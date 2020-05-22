@@ -64,13 +64,13 @@ class Stage {
 
 		// Check ball collisions with walls 
 		if (ball.ypos - ball.radius <= 1) {
-			ball.lastHitObject = "top wall";
+			ball.setLastObjectHit("top wall");
 			ball.bounce("top wall");
 		} else if (ball.xpos - ball.radius <= 1) {
-			ball.lastHitObject = "left wall";
+			ball.setLastObjectHit("left wall");
 			ball.bounce("left wall");
 		} else if (ball.xpos + ball.radius >= this.canvas.width-1) {
-			ball.lastHitObject = "right wall";
+			ball.setLastObjectHit("right wall");
 			ball.bounce("right wall");
 		}
 
@@ -131,7 +131,6 @@ class Stage {
 
 		for (let ball of this.balls) {
 			if (!ball.onPlayer) {
-				// TODO: Breaking bricks when ball hits it
 				this.checkCollision(ball);
 			}
 		}
@@ -198,6 +197,18 @@ class Ball {
 		this.xDirection = direction;
 	}
 
+	setXVelocity(xvel) {
+		this.xvelocity = xvel;
+	}
+
+	setYVelocity(yvel) {
+		this.yvelocity = yvel;
+	}
+
+	setLastObjectHit(obj) {
+		this.lastHitObject = obj;
+	}
+
 	bounce(item=null) {
 		console.log("bounce");
 		// Deals with ball bounces
@@ -215,18 +226,18 @@ class Ball {
 
 			// Bounce off Player
 			if (item == LEFTMOSTPLAYER) {
-				this.xvelocity = this.xvelocity < 0 ? this.xvelocity-1 : (-1*this.xvelocity)+0.5;
+				this.xvelocity = this.xvelocity == 0 ? this.xvelocity-2 : this.xvelocity < 0 ? 1.25*this.xvelocity : 1.25*(-1*this.xvelocity);
 				this.yvelocity *= -1;
 			} else if (item == NEXTLEFTMOSTPLAYER) {
-				this.xvelocity = this.xvelocity < 0 ? this.xvelocity-1 : (-1*this.xvelocity)+0.5;
-				this.yvelocity *= -1;
+				this.xvelocity = this.xvelocity == 0 ? this.xvelocity-1 : this.xvelocity < 0 ? this.xvelocity : (-1*this.xvelocity);
+				this.yvelocity *= -1.25;
 			} else if (item == MIDDLEPLAYER) {
 				this.yvelocity *= -1;
 			} else if (item == NEXTRIGHTMOSTPLAYER) {
-				this.xvelocity = this.xvelocity < 0 ? (-1*this.xvelocity)-0.5 : this.xvelocity+1;
-				this.yvelocity *= -1;
+				this.xvelocity = this.xvelocity == 0 ? this.xvelocity+1 : this.xvelocity < 0 ? (-1*this.xvelocity) : this.xvelocity;
+				this.yvelocity *= -1.25;
 			} else if (item == RIGHTMOSTPLAYER) {
-				this.xvelocity = this.xvelocity < 0 ? (-1*this.xvelocity)-0.5 : this.xvelocity+1;
+				this.xvelocity = this.xvelocity == 0 ? this.xvelocity+2 : this.xvelocity < 0 ? 1.25*(-1*this.xvelocity) : 1.25*this.xvelocity;
 				this.yvelocity *= -1;
 			} 
 
@@ -301,8 +312,8 @@ class Player {
 	}
 
 	releaseBall() {
-		this.hasBall.xvelocity = this.hasBall.initialSpeed;
-		this.hasBall.yvelocity = this.hasBall.initialSpeed;
+		this.hasBall.setXVelocity(0);
+		this.hasBall.setYVelocity(this.hasBall.initialSpeed);
 		this.hasBall.bounce();
 	}
 
@@ -314,7 +325,7 @@ class Player {
 		if (ball.ypos + ball.radius >= this.ypos - (this.height/2) &&
 			this.xpos - (this.length/2) <= ball.xpos && ball.xpos <= this.xpos + (this.length/2)) {
 
-			ball.lastHitObject = "player";
+			ball.setLastObjectHit("player");
 
 			// console.log("ball position: ");
 			// console.log(ball.xpos, ball.ypos);
@@ -393,7 +404,7 @@ class Player {
 		if (action == "left" || action == "right") {
 			this.xDirection = 0;
 			if (this.hasBall) {
-				this.hasBall.setXDirection(0);
+				this.hasBall.setXDirection(this.xDirection);
 			}
 		}
 	}
