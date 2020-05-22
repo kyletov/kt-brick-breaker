@@ -14,7 +14,9 @@ function setupGame() {
 
 function startGame() {
 	stage.canvas = document.getElementById('stage');
-	interval = setInterval( () => { stage.update(); stage.draw(); }, 20);
+	if (!interval) {
+		interval = setInterval( () => { stage.update(); stage.draw(); }, 20);
+	}
 }
 
 function pauseGame() {
@@ -38,7 +40,7 @@ function moveByKey(event) {
 		'd': { "move": "right" },
 		'ArrowLeft': { "move": "left" },
 		'ArrowRight': { "move": "right" },
-		' ': { "move": "spacebar" }
+		'b': { "move": "shoot" }
 	};
 
 	if (key in moveMap) {
@@ -53,7 +55,7 @@ function stopByKey(event) {
 		'd': { "move": "right" },
 		'ArrowLeft': { "move": "left" },
 		'ArrowRight': { "move": "right" },
-		' ': { "move": "spacebar" }
+		'b': { "move": "shoot" }
 	};
 
 	if (key in moveMap) {

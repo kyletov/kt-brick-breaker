@@ -377,7 +377,7 @@ class Player {
 			if (this.hasBall) {
 				this.hasBall.setXDirection(this.xDirection)
 			}
-		} else if (action == "spacebar") {
+		} else if (action == "shoot") {
 			if (this.hasBall) {
 				console.log("released ball");
 				this.releaseBall(this.hasBall);

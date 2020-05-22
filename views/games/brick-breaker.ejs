@@ -34,26 +34,13 @@
 										<br/>
 										Right Arrow Key: To move right
 										<br/>
-										Spacebar: To release ball
+										'b': To release ball
 									</td>
 								</tr>
 							</tbody>
 						</table>
 					</center>
 				</div>
-			);
-		}
-	}
-
-	class ActionButton extends React.Component {
-		constructor(props) {
-			super(props);
-		}
-
-		render(props) {
-			return (
-				<button onClick={this.props.clickHandler} > {this.props.value}
-				</button>
 			);
 		}
 	}
@@ -89,8 +76,8 @@
 			promise.then(() => {
 				if (!isGameActive()){
 					setupGame();
-					startGame();
 				}
+				startGame();
 			});
 		}
 
