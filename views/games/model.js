@@ -21,7 +21,9 @@ class Stage {
 	constructor(stage) {
 		this.stage = stage;
 		this.canvas = null;
-		this.player = new Player();
+		this.startingXPos = this.stage.width/2;
+		this.startingYPos = this.stage.height-20;
+		this.player = new Player(this.startingXPos, this.startingYPos);
 		this.initialBall = new Ball(this.player.xpos, this.player.ypos-8, this.player.speed);
 		this.balls = [this.initialBall];
 		this.player.setHeldBall(this.balls[0]);
@@ -146,7 +148,7 @@ class Stage {
 		// Update new locations of stage elements
 		for (let ball of this.balls) {
 			ball.update();
-			if (ball.ypos >= 800) {
+			if (ball.ypos >= this.stage.height) {
 				this.balls.splice(this.balls.indexOf(ball), 1);
 			}
 		}
@@ -186,15 +188,15 @@ class Ball {
 		this.xvelocity = 0;
 		this.yvelocity = 0;
 		this.onPlayer = playerSpeed;
-		this.xDirection = 0;
+		this.playerDirection = 0;
 		this.numOfBounces = 0;
-		this.initialSpeed = 2;
-		this.speedCap = 8;
+		this.speed = 5;
+		this.speedCap = 20;
 		this.lastHitObject = null;
 	}
 
-	setXDirection(direction) {
-		this.xDirection = direction;
+	setPlayerDirection(direction) {
+		this.playerDirection = direction;
 	}
 
 	setXVelocity(xvel) {
@@ -226,8 +228,8 @@ class Ball {
 
 			// Bounce off Player
 			if (item == LEFTMOSTPLAYER) {
-				this.xvelocity = this.xvelocity == 0 ? this.xvelocity-2 : this.xvelocity < 0 ? 1.25*this.xvelocity : 1.25*(-1*this.xvelocity);
-				this.yvelocity *= -1;
+				this.xvelocity = this.xvelocity == 0 ? this.xvelocity-2 : this.xvelocity < 0 ? this.xvelocity : (-1*this.xvelocity);
+				this.yvelocity *= -1.5;
 			} else if (item == NEXTLEFTMOSTPLAYER) {
 				this.xvelocity = this.xvelocity == 0 ? this.xvelocity-1 : this.xvelocity < 0 ? this.xvelocity : (-1*this.xvelocity);
 				this.yvelocity *= -1.25;
@@ -237,8 +239,8 @@ class Ball {
 				this.xvelocity = this.xvelocity == 0 ? this.xvelocity+1 : this.xvelocity < 0 ? (-1*this.xvelocity) : this.xvelocity;
 				this.yvelocity *= -1.25;
 			} else if (item == RIGHTMOSTPLAYER) {
-				this.xvelocity = this.xvelocity == 0 ? this.xvelocity+2 : this.xvelocity < 0 ? 1.25*(-1*this.xvelocity) : 1.25*this.xvelocity;
-				this.yvelocity *= -1;
+				this.xvelocity = this.xvelocity == 0 ? this.xvelocity+2 : this.xvelocity < 0 ? (-1*this.xvelocity) : this.xvelocity;
+				this.yvelocity *= -1.5;
 			} 
 
 			// Bounce off Left Wall or Right Wall or left/right of brick
@@ -277,8 +279,16 @@ class Ball {
 
 	update() {
 		if (this.onPlayer) {
-			this.xpos += this.onPlayer * this.xDirection;
+			this.xpos += this.onPlayer * this.playerDirection;
 		} else {
+
+			// var magnitude = Math.sqrt(Math.pow(((this.xpos + this.speed) - this.xpos), 2) + Math.pow(((this.ypos + this.speed) - this.ypos), 2));
+			// console.log(this.xpos, this.ypos);
+
+			// Normalize velocities
+			// var xDirection = (1/magnitude);
+			// var yDirection = (1/magnitude);
+
 			this.xpos += this.xvelocity;
 			this.ypos += this.yvelocity;
 			// if ((0 < Math.abs(this.xpos) && Math.abs(this.xpos) < 1) || (0 < Math.abs(this.ypos) && Math.abs(this.ypos) < 1)) {
@@ -297,11 +307,11 @@ class Ball {
 }
 
 class Player {
-	constructor() {
-		this.xpos = 400;
-		this.ypos = 780;
+	constructor(xpos, ypos) {
+		this.xpos = xpos;
+		this.ypos = ypos;
 		this.height = 6;
-		this.length = 70;
+		this.length = 100;
 		this.speed = 10;
 		this.xDirection = 0;
 		this.hasBall = null;
@@ -313,7 +323,7 @@ class Player {
 
 	releaseBall() {
 		this.hasBall.setXVelocity(0);
-		this.hasBall.setYVelocity(this.hasBall.initialSpeed);
+		this.hasBall.setYVelocity(1);
 		this.hasBall.bounce();
 	}
 
@@ -381,12 +391,12 @@ class Player {
 		if (action == "left") {
 			this.xDirection = -1;
 			if (this.hasBall) {
-				this.hasBall.setXDirection(this.xDirection);
+				this.hasBall.setPlayerDirection(this.xDirection);
 			}
 		} else if (action == "right") {
 			this.xDirection = 1;
 			if (this.hasBall) {
-				this.hasBall.setXDirection(this.xDirection)
+				this.hasBall.setPlayerDirection(this.xDirection)
 			}
 		} else if (action == "shoot") {
 			if (this.hasBall) {
@@ -404,7 +414,7 @@ class Player {
 		if (action == "left" || action == "right") {
 			this.xDirection = 0;
 			if (this.hasBall) {
-				this.hasBall.setXDirection(this.xDirection);
+				this.hasBall.setPlayerDirection(this.xDirection);
 			}
 		}
 	}
@@ -472,7 +482,7 @@ class Brick {
 		
 		// Check if in hitzone
 		if (inXRange && inYRange) {
-			let buffer = ball.radius/2;
+			let buffer = ball.radius/4;
 			this.active = false;
 			if (ball.xpos + ball.radius == this.xpos && ball.ypos - buffer >= this.ypos && ball.ypos + buffer <= this.ypos + this.height) { // left side
 				return LEFTSIDE;
@@ -484,7 +494,7 @@ class Brick {
 				return BOTTOMSIDE;
 			} else { // One of the corners
 				// Figure out which corner
-				ball.lastHitObject = this;
+				ball.setLastObjectHit(this);
 				return this.whichCorner(ball);
 			}
 		}
