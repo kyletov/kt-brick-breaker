@@ -59,6 +59,6 @@ function stopByKey(event) {
 	};
 
 	if (key in moveMap) {
-		stage.player.stop(moveMap[key].move);
+		stage.player.stop("moving");
 	}
 }
