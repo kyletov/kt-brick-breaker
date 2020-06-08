@@ -57,14 +57,141 @@
 		}
 	}
 
+	class PlayView extends React.Component {
+		constructor(props) {
+			super(props);
+		}
+
+		render() {
+			return (
+				<center>
+					<table>
+						<tbody>
+							<tr>
+								<td>
+									<center>
+										<h1>Welcome to KT Brick Breaker!</h1>
+									</center>
+									<GameCanvas />
+								</td>
+								<td>
+									<Button clickHandler={this.props.playButtonHandler} value="Play" />
+								</td>
+								<td>
+									<Button clickHandler={this.props.quitButtonHandler} value="Quit" />
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<Instructions />
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</center>
+			);
+		}
+	}
+
+	class ControlView extends React.Component {
+		constructor(props) {
+			super(props);
+		}
+
+		render() {
+			return (
+				<center>
+					<h1>Welcome to KT Brick Breaker!</h1>
+					<h2>Controls</h2>
+					<table>
+						<tbody>
+							<tr>
+								<td>
+									<Instructions />
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<Button clickHandler={this.props.backButtonHandler} value="Back" />
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</center>
+			);
+		}
+	}
+
+	class LeaderboardView extends React.Component {
+		constructor(props) {
+			super(props);
+		}
+
+		render() {
+			return (
+				<center>
+					<h1>Welcome to KT Brick Breaker!</h1>
+					<h2>Leaderboards</h2>
+					<table>
+						<tbody>
+							<tr>
+								<td>
+									<Button clickHandler={this.props.backButtonHandler} value="Back" />
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</center>
+			);
+		}
+	}
+
+	class HomeView extends React.Component {
+		constructor(props) {
+			super(props);
+		}
+
+		render() {
+			return (
+				<center>
+					<h1>Welcome to KT Brick Breaker!</h1>
+					<br/>
+					<table>
+						<tbody>
+							<tr>
+								<td>
+									<Button clickHandler={this.props.playButtonHandler} value="Play" />
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<Button clickHandler={this.props.controlButtonHandler} value="Controls" />
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<Button clickHandler={this.props.leaderboardButtonHandler} value="Leaderboards" />
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</center>
+			);
+		}
+	}
+
 	class ViewComponent extends React.Component {
 		constructor(props) {
 			super(props);
 			this.state = {
-				"currentView": "HomePage"
+				"currentView": "HomeView"
 			}
 			this.playButtonClickHandler = this.playButtonClickHandler.bind(this);
 			this.pauseButtonClickHandler = this.pauseButtonClickHandler.bind(this);
+			this.quitButtonClickHandler = this.quitButtonClickHandler.bind(this);
+			this.backButtonClickHandler = this.backButtonClickHandler.bind(this);
+			this.controlButtonClickHandler = this.controlButtonClickHandler.bind(this);
+			this.leaderboardButtonClickHandler = this.leaderboardButtonClickHandler.bind(this);
 		}
 
 		playButtonClickHandler(e) {
@@ -85,31 +212,50 @@
 			pauseGame();
 		}
 
+		quitButtonClickHandler(e) {
+			pauseGame();
+			this.setState( (prevState, props) => {
+				return { "currentView": "HomeView" };
+			});
+		}
+
+		backButtonClickHandler(e) {
+			this.setState( (prevState, props) => {
+				return { "currentView": "HomeView" };
+			});
+		}
+
+		controlButtonClickHandler(e) {
+			this.setState( (prevState, props) => {
+				return { "currentView": "ControlView" };
+			});
+		}
+
+		leaderboardButtonClickHandler(e) {
+			this.setState( (prevState, props) => {
+				return { "currentView": "LeaderboardView" };
+			});
+		}
+
 		render() {
-			return (
-				<center>
-					<table>
-						<tbody>
-							<tr>
-								<td>
-									<center>
-										<h1>Welcome to KT Brick Breaker!</h1>
-									</center>
-									<GameCanvas />
-								</td>
-								<td>
-									<Button clickHandler={this.playButtonClickHandler} value="Play" />
-								</td>
-							</tr>
-							<tr>
-								<td>
-									<Instructions />
-								</td>
-							</tr>
-						</tbody>
-					</table>
-				</center>
-			);
+			if (this.state.currentView == "PlayView") {
+				return (
+					<PlayView playButtonHandler={this.playButtonClickHandler} quitButtonHandler={this.quitButtonClickHandler} />
+				);
+			} else if (this.state.currentView == "ControlView") {
+				return (
+					<ControlView backButtonHandler={this.backButtonClickHandler} />
+				);
+			} else if (this.state.currentView == "LeaderboardView") {
+				return (
+					<LeaderboardView backButtonHandler={this.backButtonClickHandler} />
+				);
+			} else {
+				return (
+					<HomeView playButtonHandler={this.playButtonClickHandler} controlButtonHandler={this.controlButtonClickHandler} leaderboardButtonHandler={this.leaderboardButtonClickHandler} />
+				);
+			}
+			
 		}
 	}
 
