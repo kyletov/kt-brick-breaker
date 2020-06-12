@@ -75,7 +75,7 @@
 									<GameCanvas />
 								</td>
 								<td>
-									<Button clickHandler={this.props.playButtonHandler} value="Play" />
+									<Button clickHandler={this.props.pauseButtonHandler} value="Pause" />
 								</td>
 								<td>
 									<Button clickHandler={this.props.quitButtonHandler} value="Quit" />
@@ -233,7 +233,7 @@
 		render() {
 			if (this.state.currentView == "PlayView") {
 				return (
-					<PlayView playButtonHandler={this.playButtonClickHandler} quitButtonHandler={this.quitButtonClickHandler} />
+					<PlayView pauseButtonHandler={this.pauseButtonClickHandler} quitButtonHandler={this.quitButtonClickHandler} />
 				);
 			} else if (this.state.currentView == "ControlView") {
 				return (
