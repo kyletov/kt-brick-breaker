@@ -35,6 +35,10 @@ class Stage {
 		return this.bricks.length == 0;
 	}
 
+	isLost() {
+		return this.player.lives == 0;
+	}
+
 	resetInitialState() {
 		this.balls.push(new Ball(this.player.xpos, this.player.ypos-8, this.player.speed));
 		this.player.setHeldBall(this.balls[0]);
@@ -53,12 +57,14 @@ class Stage {
 	}
 
 	checkBallBrickCollision(ball) {
+		var points = 0;
 		for (let brick of this.bricks) {
 			let inXRange = ball.xpos >= brick.xpos - ball.radius && ball.xpos <= brick.xpos + brick.width + ball.radius;
 			let inYRange = ball.ypos >= brick.ypos - ball.radius && ball.ypos <= brick.ypos + brick.height + ball.radius;
 			
 			if (inXRange && inYRange) {
 				brick.active = false;
+				points = brick.points;
 				
 				if (ball.xpos + ball.radius >= brick.xpos && ball.xpos - ball.radius <= brick.xpos + brick.width && ball.ypos >= brick.ypos && ball.ypos <= brick.ypos + brick.height) {
 					ball.bounce(VERTICALSIDE);
@@ -90,6 +96,7 @@ class Stage {
 				}
 			}
 		}
+		return points;
 	}
 
 	checkBallWallCollision(ball) {
@@ -126,11 +133,19 @@ class Stage {
 			endGame();
 		}
 
+		if (this.isLost()) {
+			console.log("You lose...");
+			endGame();
+		}
+
 		for (let ball of this.balls) {
 			if (!ball.onPlayer) {
 				this.checkBallPlayerCollision(ball);
-				this.checkBallBrickCollision(ball);
 				this.checkBallWallCollision(ball);
+				let points = this.checkBallBrickCollision(ball);
+				if (points != 0) {
+					this.player.increaseScore(points);
+				}
 			}
 		}
 
@@ -147,10 +162,11 @@ class Stage {
 			ball.update();
 			if (ball.ypos >= this.stage.height) {
 				this.balls.splice(this.balls.indexOf(ball), 1);
+				this.player.loseLife();
 			}
 		}
 
-		if (this.balls.length == 0) {
+		if (this.balls.length == 0 && !this.isLost()) {
 			this.resetInitialState();
 		}
 
@@ -174,6 +190,12 @@ class Stage {
 		for (let brick of this.bricks) {
 			brick.draw(context);
 		}
+
+		context.font = "18px Comic Sans MS";
+	    context.fillStyle = "yellow";
+
+	    context.fillText("Lives: " + this.player.lives, 10, 20);
+	    context.fillText("Score: " + this.player.score, 10, 40);
 	}
 }
 
@@ -261,10 +283,20 @@ class Player {
 		this.speed = PLAYERSPEED;
 		this.xDirection = 0;
 		this.hasBall = null;
+		this.lives = 3;
+		this.score = 0;
 	}
 
 	setHeldBall(ball) {
 		this.hasBall = ball;
+	}
+
+	increaseScore(points) {
+		this.score += points;
+	}
+
+	loseLife() {
+		this.lives -= 1;
 	}
 
 	releaseBall() {
@@ -342,6 +374,7 @@ class Brick {
 		this.height = 20;
 		this.colour = "green";
 		this.active = true;
+		this.points = 20;
 	}
 
 	isAlive() {

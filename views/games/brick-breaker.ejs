@@ -132,15 +132,8 @@
 				<center>
 					<h1>Welcome to KT Brick Breaker!</h1>
 					<h2>Leaderboards</h2>
-					<table>
-						<tbody>
-							<tr>
-								<td>
-									<Button clickHandler={this.props.backButtonHandler} value="Back" />
-								</td>
-							</tr>
-						</tbody>
-					</table>
+					<table id="leaderboards"></table>
+					<Button clickHandler={this.props.backButtonHandler} value="Back" />
 				</center>
 			);
 		}
@@ -199,7 +192,7 @@
 				return { "currentView": "PlayView" };
 			});
 
-			let promise = new Promise(resolve => setTimeout(resolve, 10));
+			let promise = new Promise(resolve => setTimeout(resolve, 20));
 			promise.then(() => {
 				if (!isGameActive()){
 					setupGame();
